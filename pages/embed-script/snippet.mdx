@@ -1,0 +1,81 @@
+---
+title: The snippet explained
+description: What every part of the generated script tag does, and the optional attributes.
+---
+
+# The snippet explained
+
+There is nothing to change in the generated script — copy it whole. This page is
+for when you want to know what each part is doing, or you need the optional
+attributes.
+
+```html
+<script src="https://your-wordpress.com/wp-content/plugins/beplus-site-assistant/assets/embed.js"
+        data-bsa-site="https://the-other-site.com"
+        data-bsa-key="pk_xxxxxxxxxxxxxxxxxxxxxxxx"
+        defer></script>
+```
+
+## The parts
+
+| Part | What it does |
+| --- | --- |
+| `src` | Where the loader lives — on **your WordPress**, not on the other site. It mounts the same chat widget runtime your own site uses: same CSS, same JavaScript, same settings. It is not a second, simplified chat. |
+| `data-bsa-site` | Which website this script belongs to. Must match the address you added **exactly** — this is the value checked on every request. |
+| `data-bsa-key` | The public key minted for that website. Safe to be visible: on its own it opens nothing. It only works together with a matching `data-bsa-site`. |
+| `defer` | Lets the page finish loading first, so the widget never delays the site. Leave it in. |
+
+## Optional attributes
+
+You will not normally need these. They exist for hosting arrangements where the
+script is not served from WordPress itself.
+
+| Attribute | Default | When you would use it |
+| --- | --- | --- |
+| `data-bsa-api` | The origin of `src` | The script file is **hosted somewhere else** — copied onto the site, or served from a CDN. Points the widget back at your WordPress. |
+| `data-bsa-mode` | `direct` | Set to `bridge` when a server-side signing proxy sits in front of WordPress. See **[Advanced: the signed bridge](/embed-script/bridge)**. |
+
+### Example — script copied onto the site itself
+
+If you host `embed.js` on the other site rather than loading it from WordPress,
+the widget can no longer work out where WordPress is, so you must say:
+
+```html
+<script src="/assets/embed.js"
+        data-bsa-api="https://your-wordpress.com"
+        data-bsa-site="https://the-other-site.com"
+        data-bsa-key="pk_xxxxxxxxxxxxxxxxxxxxxxxx"
+        defer></script>
+```
+
+## How the widget starts up
+
+Worth knowing, because it explains most symptoms:
+
+1. The loader reads its own attributes and works out where WordPress is.
+2. It asks WordPress for the **public configuration** — colours, wording, FAQs,
+   lead settings. This is the first request, and it is the one that gets refused
+   if the address is not approved.
+3. If that succeeds, it loads the widget's stylesheet and script from WordPress
+   and mounts the chat.
+
+**So a refusal happens at step 2, before anything is drawn on the page.** That is
+why a blocked embed shows no error message and no placeholder — there is nothing
+to show, because the widget never got far enough to exist.
+
+The loader asks for the configuration through the plain WordPress request path
+first, and falls back to the REST API path if that fails. That fallback is why
+the embed still works on hosts where the REST layer is restricted.
+
+## A note on the key
+
+The `pk_` prefix marks this as a **public** key. It is designed to be visible in
+page source. What makes it safe is not secrecy but scope:
+
+- It works only for the one address it was minted for.
+- It grants nothing except the ability to ask questions of your assistant.
+- It cannot read your conversations, your settings or your AI key.
+- It stops working the moment you pause or remove that website.
+
+If you ever want to invalidate every script at once, remove the websites and add
+them again — new keys are minted, and the old ones are dead.

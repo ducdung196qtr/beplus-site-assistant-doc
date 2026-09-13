@@ -1,0 +1,103 @@
+---
+title: When a site is refused
+description: Every reason an embed can be refused, what it looks like, and the exact fix.
+---
+
+# When a site is refused
+
+Every way an embed can be refused, in one table. Find your symptom in the first
+column and the fix is in the last.
+
+## First, the thing that confuses everyone
+
+**A refused embed looks exactly like an embed you never added.** Nothing appears
+on the page, the widget never opens, and in most cases there is no error message
+at all in the browser console.
+
+That is by design, not a bug. Each website's key is bound to that one address, so
+a refusal must not tell an attacker which addresses are approved and which are
+not — a vague refusal is the safe answer. The cost is that it also tells *you*
+nothing, so the diagnosis has to happen on your WordPress side.
+
+**So: start from WordPress, not from the other website.**
+
+## The table
+
+| What you see | Status | What it means | The fix |
+| --- | --- | --- | --- |
+| Nothing appears; address was never added | `403` | The website is not on the list. The key, if there is one, was never even looked at. | Add the exact address in **Embed Script** |
+| Nothing appears; address **is** on the list and shows **Connected** | `403` | The browser is sending a different origin from the one you added — usually `www` or `http` vs `https` | Add the form your visitors actually use; see **The `www` trap** below |
+| Nothing appears; website shows **Paused** | `403` | That one website is switched off | Press **Connect** — the same script starts working again, no changes needed |
+| Every embedded site stopped at once | `403` | The global master switch is paused | Resume external embeds. Your websites and keys are kept |
+| The script was copied to a **different** domain | `403` | A key only works for the address it was minted for | Add that domain and use **its own** script |
+| Nothing appears on an HTTPS site; WordPress is on `http://` | *browser blocks it* | The browser silently refuses a script served over plain HTTP on a secure page — the visitor is told nothing | Serve WordPress over HTTPS. See **[The HTTPS requirement](/embed-script/https)** |
+| Nothing appears; you pasted a path or a wildcard | `403` | `example.com/pricing` and `*.example.com` are not website addresses | Enter the origin only: `https://example.com` |
+| Bridge requests refused, server clock was recently wrong | `403` | The signature timestamp is more than 60 seconds from your server's time | Correct the clock (enable NTP) on whichever machine signs |
+| The same signed request refused the second time | `409` | Replay protection — a signed request may only be used once | Send a **fresh** nonce and timestamp per request |
+| Bridge requests refused after rotating the secret | `503` | The bridging server is still using the old secret | Update the site server with the new secret and deploy again |
+
+## The `www` trap
+
+This deserves its own section because it accounts for most "it just doesn't
+work" reports.
+
+`https://example.com` and `https://www.example.com` are **two different
+websites** as far as the check is concerned. So is `http://` versus `https://`.
+
+**How to get it right first time:**
+
+1. Open the other website in a browser.
+2. Copy the address straight out of the address bar, including `https://` and
+   any `www.`.
+3. Paste exactly that into **Embed Script**.
+
+**How to confirm which one is being sent**, if you are already stuck: open the
+browser's developer tools on the other site, look at the network requests, and
+find the one the widget makes to your WordPress. Its `Origin` header shows the
+exact string being checked. Compare it, character by character, with what is in
+your website list. A missing `www.` is easy to miss by eye.
+
+> 💡 **Both forms are needed if both work.**
+> If your site answers on `example.com` *and* `www.example.com` — many hosts do —
+> add **both** as separate websites, each with its own script. There is no way to
+> cover both with one entry.
+
+## The HTTPS requirement
+
+If your WordPress address begins with `http://`, the script it generates will be
+blocked on every HTTPS website. Look at the top of the **Embed Script** screen: if
+your address is plain HTTP, the plugin says so in a warning, because this failure
+is otherwise invisible.
+
+Full explanation and the fix: **[The HTTPS requirement](/embed-script/https)**.
+
+## Checking from the other side
+
+When you want to see the refusal for yourself, open the other website and in the
+browser developer tools look at the network requests. You are looking for a
+request to your WordPress domain that returned **403**, **409** or **503**.
+
+Anything in the 4xx or 5xx range means the request *did* reach WordPress and was
+refused there — which is genuinely useful information, because it means the
+problem is the approval, not the network. A request that fails to appear at all
+usually means the browser blocked it before it left, which points at HTTPS.
+
+## When it is not a refusal at all
+
+Three symptoms that look like refusals but are not:
+
+| Symptom | Actual cause | Where to go |
+| --- | --- | --- |
+| Widget appears, but every answer is a generic error | The AI provider is unreachable or the key is wrong | **[AI & Model](/ai-settings)** |
+| Widget appears, but answers say it does not know | Your content was never scanned, or the topic is not on the site | **[Knowledge Base](/knowledge)** |
+| Widget appears on your own site but not the other one | This is a genuine embed problem | You are on the right page — work through the table above |
+
+## The one thing to check first
+
+Nine times out of ten, the answer is one of these three:
+
+1. **The address is not on the list** — or is on it in the wrong form.
+2. **The `www` (or `http`/`https`) does not match** what the browser sends.
+3. **WordPress is on plain HTTP**, so the browser blocks the script silently.
+
+Check those three before anything else.

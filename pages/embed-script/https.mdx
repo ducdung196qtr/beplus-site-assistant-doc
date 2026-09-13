@@ -1,0 +1,104 @@
+---
+title: The HTTPS requirement
+description: Why a plain-HTTP WordPress silently fails to embed on an HTTPS site, and how to fix it.
+---
+
+# The HTTPS requirement
+
+This is the failure that wastes the most time, because nothing anywhere tells you
+it happened.
+
+## The rule
+
+**A browser will not load a script served over plain `http://` onto a page that
+is served over `https://`.**
+
+The browser calls this **mixed content**, and it blocks it. It does not show a
+warning to the visitor. It does not show an error you will notice in the console.
+The script simply never runs, so the widget never appears.
+
+The important asymmetry:
+
+| The other website | Your WordPress | Result |
+| --- | --- | --- |
+| `https://` | `https://` | ✅ Works |
+| `https://` | `http://` | ❌ **Blocked silently** |
+| `http://` | `http://` | ⚠️ Usually works — but your WordPress is insecure |
+| `http://` | `https://` | ⚠️ Usually works |
+
+Almost every real site these days is HTTPS, so in practice: **if your WordPress is
+on plain HTTP, embedding is broken and there is no visible reason why.**
+
+## How to tell
+
+Look at the top of **Site Assistant → Embed Script**:
+
+**If your WordPress address is plain HTTP, the screen shows a warning** naming your
+address and explaining that the generated script will not load on an HTTPS site.
+The plugin warns here deliberately — this is the last point at which the problem
+is still visible and still fixable.
+
+You can also see it in the script itself. If `src` begins with `http://` rather
+than `https://`, the script will be blocked on any secure site.
+
+## The fix
+
+**Serve WordPress over HTTPS.** That is the whole fix, and it is a hosting task
+rather than a plugin one. In practice it means one of:
+
+- Turning on the free certificate your host already provides (Let's Encrypt, or
+  the host's own one-click SSL)
+- Putting a TLS-terminating proxy in front of your existing WordPress — Caddy,
+  Nginx or Cloudflare all do this
+- Updating `siteurl` and `home` in WordPress once the certificate is live, so the
+  addresses WordPress generates are HTTPS too
+
+Once WordPress is reached over HTTPS, reopen **Embed Script**. The warning is
+gone, and the script now begins with `https://`. Re-copy it into the other
+website — **the old script still says `http://`, so it must be replaced.**
+
+> 💡 **Testing on a plain-HTTP install?**
+> The script follows the address you are using, so if you reach the same
+> WordPress through an HTTPS address, the script shown on that page is the HTTPS
+> one. That is the one to copy for a real site.
+
+## A related trap: the widget loads from your WordPress
+
+It is worth being clear about *why* the other website's security settings matter
+here.
+
+The script on the other website is not a self-contained widget. It **loads the
+chat's stylesheet and JavaScript from your WordPress** every time. So the other
+site needs to be able to reach your WordPress over HTTPS — not just once, but on
+every page load, for every visitor.
+
+Two consequences:
+
+- **Your WordPress must stay up.** If it is down, the assistant is missing from
+  every site that embeds it.
+- **Your WordPress must be publicly reachable**, not on a local network or behind
+  a login.
+
+If you want the widget to work when the other site cannot reach WordPress
+directly, the answer is the **[signed bridge](/embed-script/bridge)** — a
+server-side proxy that sits in between.
+
+## Reverse proxies and tunnels
+
+If WordPress sits behind a reverse proxy or a tunnel, the script is generated
+from **the address the browser actually used to reach that page** — not from a
+hard-coded setting. So if you open the Embed Script screen through the address
+your visitors use, the script it hands you is the right one.
+
+If the script shows the wrong address, you are almost certainly viewing the admin
+through the wrong address. Open the admin the same way your visitors reach the
+site, and copy the script from there.
+
+## Checklist
+
+- [ ] Open **Embed Script** and check for the HTTP warning
+- [ ] Confirm the `src` in the generated script begins with `https://`
+- [ ] If not: enable a certificate on your host, or add a proxy in front
+- [ ] Update WordPress's own address settings to HTTPS
+- [ ] Reopen **Embed Script** and confirm the warning is gone
+- [ ] **Re-copy the script** into the other website — the old one is still HTTP

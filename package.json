@@ -1,0 +1,22 @@
+{
+  "name": "beplus-site-assistant-docs",
+  "version": "1.0.0",
+  "description": "Beplus Site Assistant - AI Website Assistant for WordPress - Documentation",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^13.0.6",
+    "nextra": "^2.13.4",
+    "nextra-theme-docs": "^2.13.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.11.10",
+    "typescript": "^4.9.3"
+  }
+}

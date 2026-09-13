@@ -1,0 +1,127 @@
+---
+title: When a site is accepted
+description: The exact checklist a website must pass before the assistant will answer it.
+---
+
+# When a site is accepted
+
+Every request from another website — whether it is asking for the widget's
+colours or sending a visitor's question — passes the same gate on your WordPress
+before anything else happens. This page is that gate, in order.
+
+## The checklist
+
+A website is accepted only if **all** of these are true.
+
+### 1. It is on the list
+
+The address must have been added under **Site Assistant → Embed Script**. The
+list is the single source of truth — there is no other place to allow a site, and
+no wildcard that opens a range of addresses.
+
+### 2. It is switched on
+
+The website must be showing **Connected**, not **Paused**. Pausing one website
+stops that site only; the others carry on untouched.
+
+### 3. Embeds are not globally paused
+
+The master switch must be off. If you have paused every external embed, no
+website is accepted — including ones that are individually connected. This is the
+switch to reach for if you want to stop all external traffic at once without
+losing your setup.
+
+### 4. The address is a well-formed origin
+
+The address is stripped down to its origin and must then be:
+
+- a proper URL, with scheme `http` or `https`
+- with a hostname containing a dot
+- **without** a username, password, query string or fragment
+
+So `https://example.com` is fine. `https://user:pass@example.com`,
+`https://example.com/?utm_source=x` and `https://example.com#top` are not — those
+are page addresses, not website identities.
+
+### 5. The address matches exactly
+
+The origin sent by the browser is compared **character for character** against
+the list. Not by similarity, not by domain family. Exact.
+
+This is where the two classic failures live:
+
+| What you added | What the browser sends | Result |
+| --- | --- | --- |
+| `https://example.com` | `https://example.com` | ✅ Accepted |
+| `https://www.example.com` | `https://www.example.com` | ✅ Accepted |
+| `https://example.com` | `https://www.example.com` | ❌ Refused — different origin |
+| `http://example.com` | `https://example.com` | ❌ Refused — different scheme |
+
+### 6. One of the two proofs is valid
+
+With the address approved, the request must carry **either**:
+
+**The site's own public key** (the normal case) — the `data-bsa-key` value in the
+script, compared against the key minted for that address. A key from one website
+presented by another is refused.
+
+**Or a valid signature** (only if you have set up the signed bridge) — a
+server-side signature proving the request came through your proxy. See
+**[Advanced: the signed bridge](/embed-script/bridge)**.
+
+### 7. For the signed bridge only — three extra conditions
+
+- The **timestamp** must be within **60 seconds** of your server's clock
+- The **nonce** must be well-formed and **not seen before** (a replayed request
+  is refused)
+- The **shared secret** must be present on your WordPress
+
+## What happens when a site passes
+
+The request is accepted and the widget gets what it needs: colours, wording, FAQs
+and lead settings. On a chat request, the visitor's question goes to the assistant
+and the answer comes back — with the same security and rate limits your own
+site's visitors get, counted against the **real visitor IP**.
+
+## The order matters
+
+The checks run in the order above, and the first failure ends the request. Useful
+to know when diagnosing:
+
+- If the website is **not on the list at all**, nothing after check 1 is even
+  looked at. You will never see a key error, because the key was never read.
+- If the address **does not match**, you get the same refusal as a site that was
+  never added. **This is why a mismatch looks identical to having done nothing** —
+  there is no way to tell them apart from the other side.
+
+That last point is the single most useful thing on this page. When an embed fails
+and the console shows nothing helpful, the cause is almost always check 1, 2, 5,
+or the HTTPS problem on the next page — not the key.
+
+## The full picture
+
+```
+Browser on the other website
+        │
+        │  asks: "give me the widget settings"
+        ▼
+Your WordPress — the gate
+        │
+        ├─ 1. Is this address on the list?          ✗ → refused
+        ├─ 2. Is that website switched on?          ✗ → refused
+        ├─ 3. Are embeds globally enabled?          ✗ → refused
+        ├─ 4. Is the address well-formed?           ✗ → refused
+        ├─ 5. Does it match exactly?                ✗ → refused
+        │
+        ├─ 6a. Does it carry its own site key?      ✓ → accepted
+        └─ 6b. Or a valid bridge signature?         ✓ → accepted
+                    │
+                    ▼
+        Widget loads · question answered · conversation logged
+```
+
+## Related
+
+- Failed one of these? → **[When a site is refused](/embed-script/rejected)**
+- WordPress on plain HTTP? → **[The HTTPS requirement](/embed-script/https)**
+- Want the strongest setup? → **[Advanced: the signed bridge](/embed-script/bridge)**

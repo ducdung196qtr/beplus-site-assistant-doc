@@ -1,0 +1,94 @@
+---
+title: Pause, resume and remove
+description: Controlling connected websites without touching the script on the other site.
+---
+
+# Pause, resume and remove
+
+Every website on the list has its own switch, and there is a master switch above
+them all. Knowing which to reach for saves you from re-deploying scripts on other
+people's sites.
+
+## The three controls
+
+| Control | Scope | What happens to the script on the other site |
+| --- | --- | --- |
+| **Pause connection** | One website | Stays exactly where it is — it just stops being accepted |
+| **Connect** | One website | The same script starts working again, unchanged |
+| **Pause all external embeds** | Every website | Every script stops being accepted; the list and all keys are kept |
+| **Remove** | One website | Permanently forgotten, key retired; the script on their site is dead |
+
+## Pausing one website
+
+Press **Pause connection** on a website row. Its badge changes from
+**Connected** to **Paused**, and its script is refused from that moment.
+
+**The script on the other site is not touched.** It is still in their footer,
+still loads, and is still refused at your end. That is the point: you can stop a
+site instantly without asking anyone to edit their site.
+
+Press **Connect** to undo it. **The same script keeps working** — no new key, no
+re-copying, nothing to coordinate with whoever runs the other site.
+
+**When to use it:** a client site is being rebuilt and you do not want the
+assistant answering from stale content; a campaign has ended; a partner site is
+sending you low-quality traffic.
+
+## Pausing everything at once
+
+The master switch stops **every** external embed, connected or not. Your website
+list, their keys and their settings are all kept, so resuming needs no new
+scripts anywhere.
+
+**When to use it:** you are doing maintenance on the knowledge base and do not
+want half-updated answers going out; you are migrating hosts; something is
+flooding you with traffic and you want it to stop immediately.
+
+Your **own site's** widget keeps working when external embeds are paused — this
+switch is about other websites only.
+
+## Removing a website
+
+Removing forgets the website entirely and retires its key. Unlike pausing, this
+**cannot be undone**: adding the address again mints a **new** key, so the old
+script in the other site's footer will stay dead until someone replaces it with
+the new one.
+
+**When to use it:** the site no longer exists; the relationship has ended and you
+want the key destroyed rather than merely dormant.
+
+> ⚠️ **Removing needs the other site's cooperation to undo.**
+> If there is any chance you will want it back, **pause instead**. Pausing is
+> reversible without touching the other site; removing is not.
+
+## Which should I use?
+
+| Situation | Use |
+| --- | --- |
+| "Stop this site for now" | **Pause** — reversible, no coordination needed |
+| "Stop everything, I'm updating the content" | **Pause all** |
+| "This site is gone for good" | **Remove** |
+| "The other site's key may have leaked" | **Remove**, then add the address again for a new key |
+| "I want to stop *all* scripts everywhere immediately" | **Pause all** — no new scripts needed when you resume |
+
+## Rotating the bridge secret
+
+If you have set up the **[signed bridge](/embed-script/bridge)**, the Embed Script
+screen also offers **Generate a new secret**.
+
+Press it and a fresh secret is created immediately. **The old one stops working
+at once**, so any bridging server still using it will be refused until you update
+it.
+
+Rotating the secret does **not** affect ordinary direct embeds — those use public
+site keys and carry on working.
+
+The secret is never displayed in full anywhere, including here. Use **Copy** on
+the screen when you need to install it on the bridge server; it is shown masked
+everywhere else so that a glance over your shoulder is not enough to steal it.
+
+## Seeing the current state
+
+The heading of section **2. Your websites** shows how many websites are
+connected. Each row shows its own address, its own badge, and its own script — so
+you can always tell at a glance which sites are live, and which have been paused.

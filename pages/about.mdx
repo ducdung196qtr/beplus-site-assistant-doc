@@ -1,0 +1,77 @@
+---
+title: About
+description: What the plugin is, who it is for, and its licence.
+---
+
+# About
+
+**Beplus Site Assistant** is a WordPress plugin that adds an AI chat assistant to
+your site, answering visitor questions from your own content rather than from
+general knowledge.
+
+## What makes it different
+
+Most chat widgets answer from a generic model, which means they invent prices,
+policies and opening hours with total confidence. This one reads your actual
+pages first, answers from what it finds, and shows the visitor the sources it
+used.
+
+The second half of the idea is on the admin side. Every conversation is kept, and
+one press turns them into a plain answer to a question most sites never manage to
+answer: **what should we put on the website next?** The subjects people ask about
+are your content plan, and the ones your site cannot answer are your missing
+pages.
+
+## Who it is for
+
+- **Small businesses** with a handful of pages who want support questions
+  answered without hiring anyone
+- **Agencies** running several client sites — the FAQ list and settings can be
+  exported and reused, and the Embed Script screen puts one assistant on both
+  WordPress and non-WordPress sites
+- **Anyone whose site is mostly static** — the content is already there, it just
+  needs to be answerable
+
+## What it is not
+
+- **Not a replacement for a human** on anything that matters. The assistant
+  answers factual questions from your site; it escalates by email, not by taking
+  decisions.
+- **Not a live chat product** with operators on the other end. It answers by
+  itself around the clock.
+- **Not free to run** if you use a paid AI provider — every question is a small
+  call to that provider. The
+  **[Security & Limits](/security)** tab exists to cap that cost.
+
+## Privacy
+
+- **Your API key** is stored on your server and is **never sent to a browser**.
+  The settings screen can replace it but cannot display it back.
+- **Your content** goes to whichever AI provider you configure, and to no one
+  else. In Custom endpoint mode, that is a provider you chose yourself.
+- **Conversation data** is stored in **your own database**. Nothing is deleted
+  automatically, and nothing is sent anywhere except to your chosen AI provider
+  and, if you turn it on, to your notification email.
+- **Visitor names and emails** are only collected if you switch on the lead form.
+  They are stored with the conversation and emailed to the address you set.
+
+## Requirements
+
+| | |
+| --- | --- |
+| WordPress | 6.1 or newer |
+| PHP | 7.4 or newer |
+| An AI provider | A plugin under **Settings → Connectors**, or any OpenAI-compatible endpoint |
+
+## Licence
+
+Released under the **GPLv2 or later** licence, the same licence WordPress itself
+uses.
+
+## Getting help
+
+- **Something not working:** **[Troubleshooting](/troubleshooting)** covers the
+  things that usually go wrong.
+- **Putting it on a non-WordPress site:** **[Embed Script](/embed-script)** is the
+  chapter for that, including every reason a website can be refused.
+- **What changed recently:** **[Changelog](/changelog)**.

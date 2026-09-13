@@ -1,0 +1,132 @@
+---
+title: Troubleshooting
+description: The handful of things that usually go wrong, and what to do about each.
+---
+
+# Troubleshooting
+
+Start with the symptom. Each one below has a cause and a fix.
+
+## The widget does not appear on my own site
+
+| Check | Where |
+| --- | --- |
+| Is the widget switched on? | **Settings → AI & Model → Enable Frontend Chatbot Widget** |
+| Have you saved since turning it on? | Press **Save AI Settings** — nothing applies until you do |
+| Is it a caching problem? | Clear your site's cache and your browser cache, then reload |
+| Are you logged in as an administrator? | Some cache plugins skip caching for logged-in users, so you may be seeing a cached copy |
+
+## The widget does not appear on the *other* website
+
+This is an **Embed Script** problem, and it has its own chapter:
+**[When a site is refused](/embed-script/rejected)** covers every case in one
+table, with the fix. The three usual causes:
+
+1. The address was never added, or was added in a different form (`www`, `http`).
+2. WordPress is on plain HTTP, so the browser blocks the script silently.
+3. That website is paused, or all embeds are paused.
+
+## The widget appears but gives an error
+
+**The AI is not reachable.** Check **Settings → AI & Model**:
+
+- Is the **API Endpoint URL** correct? It should end at the version part, such as
+  `https://api.openai.com/v1`, not at a full `/chat/completions` address.
+- Is the key valid, and does it still have credit?
+- Is the **Model** name spelled exactly as your provider writes it?
+
+A **503** error specifically means the model is overloaded — name a different
+model and it usually clears immediately.
+
+## It says it does not know, about something on my site
+
+**The content was never scanned, or the page is not public.**
+
+- Open **Settings → Knowledge Base** and press **Re-scan site**.
+- Check the **Site Status** panel: does it list the page you expected? If not,
+  the page may be a draft, private, or a post type that is not included.
+- Is it a **product**? Those need the **E-commerce** permission turned on.
+- Did you add the page after the last scan? New pages are picked up on the next
+  daily scan, or immediately if you press **Re-scan site** yourself.
+
+If the page genuinely does not exist, then the assistant is right — that is a
+**[content gap](/seo-insights)**, not a fault.
+
+## It answered something wrong, or something it should not have
+
+Add a correction to **Settings → Knowledge Base → Custom Instructions & Business
+Rules**. Instructions there take priority over general knowledge, so a plain
+sentence such as "We do not ship outside the EU" overrides a page that is less
+clear.
+
+Then press **Re-scan site** so the change is picked up.
+
+## The analysis button does nothing
+
+- **Check the counters.** If nothing is waiting to be analysed, the button has
+  nothing to do and says so.
+- **Watch the progress bar.** On a long history the first run takes a while — it
+  is reading every conversation and sending them to the AI in batches.
+- **Closing the page mid-run is safe.** Press the button again and it continues
+  from where it stopped.
+- **If it fails outright**, the AI connection is the problem. Test it by asking
+  the widget a question; if that fails too, fix the connection first (see above).
+
+## No transcript emails are arriving
+
+**Run the test first: Settings → Leads & Email → ✉️ Send Test Email.**
+
+If the test **fails**, your host cannot send mail — this is the most common cause
+by far, and it is a hosting limitation rather than a plugin one. Install an
+**SMTP plugin** and configure a real mail account. Full explanation on
+**[Leads & Email](/leads-and-email)**.
+
+If the test **succeeds** but transcripts do not arrive:
+
+| Check | Where |
+| --- | --- |
+| Is automatic sending on? | **Settings → Leads & Email → Send Transcript Email on Session End** |
+| Is the recipient address right? | The **Recipient Notification Email** field — several addresses separated by commas |
+| Has the conversation actually ended? | A transcript is sent when a session ends — after the inactivity timeout, or when the visitor clears the chat. A conversation still open has not been emailed yet. |
+| Did it go to spam? | Check the recipient's spam folder, and mark it as not spam |
+| Is it still in the list unsent? | **Conversations** has a **Sent** column — an unsent row means the send genuinely did not happen |
+
+You do not have to wait for a timeout: press **Re-send Email** on the row in
+**Conversations** to send it immediately.
+
+## A visitor says they were blocked
+
+They hit a rate limit or a daily budget. Check **Settings → Security & Limits**.
+
+- Hit the **daily budget**? Press **Reset today**.
+- Blocked by **auto-ban**? Find the address in the block list and unban it.
+- Being blocked **repeatedly**? Their phrasing may be tripping the limits
+  unfairly — raise the per-minute cap slightly.
+
+Make sure **Contact email for banned users** is filled in, so a blocked visitor
+has a way to reach you instead of just giving up.
+
+## The export file looks wrong
+
+The most common surprise: **the file seems to have more rows than the dialog said
+it would.**
+
+It does not. Exports are **one row per conversation**, and the transcript column
+contains the whole conversation — including the line breaks between messages. A
+spreadsheet program may show that as several visual lines while it is still a
+single row. The count in the dialog is the count of conversations, and it is
+right.
+
+## Something else
+
+Two things to check before anything else:
+
+1. **The plugin version.** Look at the header of **Site Assistant**. If it is not
+   the version you think you installed, the update did not take effect — replace
+   the ZIP again.
+2. **The Conversations log.** Whatever went wrong, there is usually a record of
+   it in **Conversations**. A failed conversation tells you whether the problem is
+   on your side or the visitor's.
+
+The **[Changelog](/changelog)** lists what changed in each release, which is
+useful when something used to work and now behaves differently.

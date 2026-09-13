@@ -1,0 +1,251 @@
+---
+title: Changelog
+description: What changed in each release.
+---
+
+# Changelog
+
+## 2.10.0
+
+**New report: questions the assistant could not answer.**
+
+Under the topic table, SEO Insights now lists the subjects visitors asked about
+that your site has no page for — "Do you ship to Japan?", "What are your support
+hours?". Each row is a page worth writing. It comes from the same one-click
+analysis as the topics, so it costs no extra AI calls.
+
+**Honest gap detection.** Only genuine content gaps are listed. Questions the
+assistant answered, greetings and small talk, and questions it was configured to
+refuse are all left out — a refusal is a setting, not a missing page. Works for
+questions asked in any language.
+
+**"Questions, word for word" has been removed.** It counted the same question
+twice whenever the wording differed slightly, which the topic report already
+handles properly by meaning.
+
+**Live Conversations is easier to work with.** The heading sits on one line with
+the Refresh and Export buttons at the right edge, and each conversation has a
+checkbox.
+
+**Act on many conversations at once.** Select any number and delete them in one
+go, or end them and send the summary email — a confirmed report says exactly what
+succeeded and what did not.
+
+**Pagination.** Choose 10, 20, 30 or 40 conversations per page, with "Showing
+21–40 of 152" underneath so the total is never a guess.
+
+**Export by count, not just by date.** The Export dialog now offers "Last N
+conversations" alongside the date range, for when you want the most recent
+hundred rather than everything since Tuesday.
+
+**The export size estimate is now accurate.** It was understating the real file
+size by more than five times, which made a large export look harmless before it
+started.
+
+**The release package now ships the embed loader.** Every earlier ZIP was built
+without `assets/embed.js`, so a site installed from a ZIP — rather than from the
+plugin folder — served a 404 for the script that puts the assistant on a
+non-WordPress website. The packaging step now includes it.
+
+## 2.9.1
+
+**Questions are now grouped by meaning, not wording.** A new report at the top of
+SEO Insights lists the subjects visitors actually ask about. "How do I install
+it?" and "steps to set it up" count as one topic instead of two separate one-off
+rows, so the report stays readable however much traffic the site gets.
+
+**Analysis runs on demand, from a button.** Nothing is analysed behind the
+scenes: one press reads the conversations and groups them, with a progress bar
+showing how far along it is. Analysis costs AI calls, so it happens when an
+administrator asks for it rather than continuously in the background.
+
+**A conversation is only ever analysed once.** Finished conversations are marked,
+and the next press looks at new conversations only, so pressing the button
+repeatedly costs nothing extra. Closing the page part-way through is safe too —
+the next press continues from where it stopped instead of starting over.
+
+**The report is bounded.** Topics are stored as a small permanent tally, and the
+table keeps the most-asked 300 so a long-running site cannot accumulate thousands
+of one-off subjects.
+
+**Word-for-word questions and top pages are still listed**, counted directly from
+the log without the AI, so both keep working even when the AI is unavailable.
+
+**Rebuild from scratch** re-reads every conversation and throws the tally away,
+for when an earlier run's results are not trustworthy.
+
+## 2.8.0
+
+**One conversation, one record.** The separate per-turn chat log is gone.
+Everything it held — the whole exchange and the page the visitor was on — now
+lives on the conversation itself, so there is a single place to look and a single
+place to delete from.
+
+**Deleting a conversation now deletes all of it.** Previously the delete button
+removed the conversation but left its turns behind, and the SEO report kept
+showing chats that had already been deleted. Deleting now clears the
+conversation, its transcript and what the assistant remembered about that
+visitor, together.
+
+**The SEO report sees every conversation.** It used to read the per-turn log,
+which only recent chats reached — on a site with 14 conversations it reported on
+2. Top pages and top questions are now counted from the conversations themselves.
+
+**Export is one row per conversation** instead of one row per message. The full
+back-and-forth sits in a single `transcript` column, so one row reads as one
+conversation.
+
+The admin screen drops the separate Chat Log tab: **Live Sessions**, **SEO
+Insights** and **Storage** cover everything. The menu entry is renamed
+**Conversations** and the table gains a **Page** column showing where each
+visitor was when they started chatting.
+
+## 2.7.0
+
+**Every conversation is now kept permanently.** A new chat log records each
+visitor question and each answer with the page URL it came from, so you can
+finally answer "which pages make people ask us things, and what do they ask?"
+That page-level record is what turns traffic into content decisions: the
+questions that repeat are the pages and FAQs you are missing.
+
+The new **Chat Log** screen replaces Live Chats and has four tabs.
+
+**Storage is small and predictable**: each turn costs roughly 326 bytes, so a
+million turns is about 650 MB. Nothing is ever deleted automatically — the log is
+yours to keep.
+
+**Assistant memory is now 7 days** (previously 30) and is purely short-term
+context for follow-up questions. The permanent record lives in the chat log, so
+shortening it no longer loses anything.
+
+Live-chat sessions are no longer deleted after 24 hours, and the session list is
+paginated.
+
+**The stored API key is no longer sent to the browser.** The settings screen now
+only reports whether a key is saved; it can be replaced but never read back.
+
+**Security fix:** the typing-time check was skipped whenever the widget's elapsed
+field was 0 or absent, so a scripted client could bypass it by simply omitting the
+value. A missing value is now treated as instant, which is what a bot looks like.
+
+**Upgrade fix:** the chat log table was gated behind a plugin-version check that
+returns early on any install already past 2.2.0, so a site updating from 2.5.x
+would never create it and the feature would silently record nothing. The schema
+now has its own version gate and is also applied on admin load.
+
+**Every entry point now records.** Three separate paths answer a visitor —
+on-site chat, a widget embedded on another website, and the Quick FAQ button — and
+two of them were not writing to the permanent log at all. All three now write the
+same record.
+
+**Visitor details are now kept for embedded sites.** The lead form lives in the
+widget, so a visitor on another website types their name and email there. Those
+two fields were never read on the way in, so every embedded conversation was
+stored without them and appeared as "Guest". They are now validated and stored
+alongside the transcript.
+
+Fixed: the version shown in the header was hardcoded and had been wrong since
+2.1.2.
+
+Fixed: "Load older turns" stacked a second table below the first instead of
+extending one log.
+
+## 2.6.0
+
+Add an **Export** button to the Live Chats screen. One click produces a single
+flat file — CSV for spreadsheets or JSONL for AI analysis — containing every
+conversation turn on the site, including questions the assistant refused to
+answer.
+
+The export is read-only and streams out one row at a time, so peak memory stays
+flat no matter how much history a site has — measured at 64 MB for a 250,000-row
+export, the same as for 500 rows.
+
+Exports over a hard ceiling are refused up front with a message asking for a
+narrower date range, so a mistaken click cannot fill the disk.
+
+## 2.5.2
+
+Say on the Embed Script screen that `example.com` and `www.example.com` are two
+different sites. A mismatch is refused silently, so a correct-looking setup can
+produce no chat at all with nothing to point at.
+
+## 2.5.1
+
+Warn in Embed Script when the WordPress address is plain HTTP. The script is then
+refused by every HTTPS site ("mixed content") and the visitor sees no chat at all,
+with nothing logged anywhere.
+
+## 2.5.0
+
+One place for everything external — **Site Assistant → Embed Script**. Each
+connected website shows its own Connect/Pause switch, its own script and its own
+status. Keys are minted and retired automatically.
+
+Pausing a website (or every embed) is refused on every transport, including
+signed server requests. Reconnecting needs no new script.
+
+The duplicate External Embed controls in Settings are gone.
+
+Security: the bridge secret is never printed in full and no longer returned by the
+settings API.
+
+## 2.4.0
+
+New **Embed Script** screen. Enter the address of the site you want the assistant
+on, get a ready-to-copy script, paste it into that site's footer. No proxy, no
+secret, no code editing.
+
+Each approved site gets its own public site key, bound to that exact address.
+Removing a site disables its script immediately.
+
+The widget now loads from the same host the browser used, so embeds work on
+HTTPS, behind a tunnel or any reverse proxy.
+
+External chat requests are rate limited against the real visitor IP.
+
+## 2.3.0
+
+External embeds can require signed server-to-server requests using HMAC, a
+60-second validity window, one-time nonces, and replay rejection.
+
+External chat requests use a verified client IP for rate limiting; unsigned
+browser-supplied IP headers are never trusted.
+
+Added exact-origin controls and safe bridge configuration guidance.
+
+## 2.1.0
+
+**Pre-chat Lead Capture gate** (Visitor Name + Email) with seamless continuous
+chat persistence.
+
+**Live Conversations Admin Dashboard** with real-time countdown timer, live chat
+viewer modal, and instant force-send.
+
+**Zero database bloat architecture** — transient sessions automatically emailed
+upon inactivity timeout or chat clear, then permanently purged.
+
+Added configurable inactivity timeout and recipient email options.
+
+## 2.0.0
+
+**Smart, semantic chunking**: content is split on paragraph and sentence
+boundaries (not fixed length) with overlap, so chunked instructions such as
+step-by-step guides stay intact.
+
+**Retrieval mode auto-detection**: if your AI endpoint offers an embedding model,
+the assistant uses semantic search — matching by meaning, not just exact words. If
+no embedding model is configured, it falls back to keyword search automatically.
+
+**Multi-chunk storage**: a long post now spans several indexed rows instead of
+being truncated to a single entry.
+
+## 1.0.0
+
+Initial release.
+
+---
+
+For the features as they stand today, see the chapters in the sidebar. The
+current version number is shown in the header of the **Site Assistant** admin
+screen.
