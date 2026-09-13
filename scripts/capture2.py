@@ -38,20 +38,19 @@ def open_widget(page):
 
 
 def fill_lead(page):
-    """Fill the name/email start screen and submit it."""
+    """Fill the name/email start screen and submit it.
+
+    Class names verified in admin/js/chat-widget.js:
+    `.bsa-lead-name`, `.bsa-lead-email`, `.bsa-lead-submit`.
+    """
     ok = page.evaluate(
         """() => {
-          const panel = document.querySelector('.bsa-panel');
-          if (!panel) return 'khong co panel';
-          const inputs = [...panel.querySelectorAll('input')];
-          const name = inputs.find(i => /name|ten/i.test(i.placeholder || '') ) || inputs[0];
-          const mail = inputs.find(i => i.type === 'email' || /mail/i.test(i.placeholder || ''))
-                     || inputs[1];
+          const name = document.querySelector('.bsa-lead-name');
+          const mail = document.querySelector('.bsa-lead-email');
           if (!name || !mail) return 'thieu o nhap';
           const set = (el, v) => {
-            const proto = el.tagName === 'TEXTAREA'
-              ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
-            Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v);
+            Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')
+              .set.call(el, v);
             el.dispatchEvent(new Event('input', { bubbles: true }));
             el.dispatchEvent(new Event('change', { bubbles: true }));
           };
@@ -66,41 +65,46 @@ def fill_lead(page):
     page.evaluate(
         "() => { const b = document.querySelector('.bsa-lead-submit'); if (b) b.click(); }"
     )
-    page.wait_for_timeout(2000)
+    page.wait_for_timeout(2200)
     return True
 
 
 def ask(page, question):
-    """Type a real question and wait for the assistant to answer."""
+    """Type a real question and wait for the assistant to answer.
+
+    The composer is `<textarea class="bsa-input">`; sending is on `.bsa-send`.
+    A native value setter plus an `input` event is required — assigning `.value`
+    alone does not reach the widget's own state (verified against the live DOM).
+    """
     typed = page.evaluate(
         """(q) => {
-          const panel = document.querySelector('.bsa-panel');
-          const box = panel && panel.querySelector('textarea, input[type=text], .bsa-input');
+          const box = document.querySelector('.bsa-input');
           if (!box) return false;
-          const proto = box.tagName === 'TEXTAREA'
-            ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
-          Object.getOwnPropertyDescriptor(proto, 'value').set.call(box, q);
+          Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')
+            .set.call(box, q);
           box.dispatchEvent(new Event('input', { bubbles: true }));
           return true;
         }""",
         question,
     )
     if not typed:
+        print("    ! khong tim thay o nhap")
         return False
-    page.wait_for_timeout(500)
+    page.wait_for_timeout(600)
     page.evaluate("() => { const b = document.querySelector('.bsa-send'); if (b) b.click(); }")
 
-    # Wait for a bot bubble to appear, then let it finish streaming.
-    for _ in range(45):
+    # Wait until an assistant bubble exists and has stopped growing.
+    last = ""
+    for _ in range(40):
         page.wait_for_timeout(1000)
-        n = page.evaluate(
-            """() => document.querySelectorAll(
-                 '.bsa-panel [class*="bot"], .bsa-panel [class*="assistant"]'
-               ).length"""
+        cur = page.evaluate(
+            "() => { const m = document.querySelector('.bsa-msg.bot');"
+            " return m ? m.textContent.trim() : ''; }"
         )
-        if n:
+        if cur and cur == last and len(cur) > 60:
             break
-    page.wait_for_timeout(5000)
+        last = cur
+    page.wait_for_timeout(1500)
     return True
 
 
