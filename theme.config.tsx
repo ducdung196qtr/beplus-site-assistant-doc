@@ -13,7 +13,10 @@ const config: DocsThemeConfig = {
     </span>
   ),
   project: {
-    link: 'https://github.com/ducdung196qtr/beplus-site-assistant'
+    // The plugin repository is private, so visitors to the published docs hit a
+    // 404 on it. Point the header link at the documentation repository, which
+    // anyone can read — and where the feedback links already send people.
+    link: 'https://github.com/ducdung196qtr/beplus-site-assistant-doc'
   },
   // The repository's default branch is master, not main. Pointing this at main
   // made every "edit this page" link 404, which is the one link a reader clicks
